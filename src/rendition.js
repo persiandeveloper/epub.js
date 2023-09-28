@@ -31,6 +31,7 @@ import ContinuousViewManager from "./managers/continuous/index";
  * @param {string | function} [options.view='iframe']
  * @param {string} [options.layout] layout to force
  * @param {string} [options.spread] force spread value
+ * 
  * @param {number} [options.minSpreadWidth] overridden by spread: none (never) / both (always)
  * @param {string} [options.stylesheet] url of stylesheet to be injected
  * @param {boolean} [options.resizeOnOrientationChange] false to disable orientation events
@@ -362,7 +363,19 @@ class Rendition {
 				this.emit(EVENTS.RENDITION.DISPLAY_ERROR, err);
 			});
 
+		this._moveToLastPage(target);
+
 		return displayed;
+	}
+
+	_moveToLastPage(target){
+		if(!target){
+			var lastPage = localStorage.getItem(this.book.key()+"lastreadingpage");
+			if(lastPage){
+				target =   JSON.parse(lastPage).start.cfi;
+				this.q.enqueue(this._display, target);
+			}
+		}
 	}
 
 	/*
@@ -718,6 +731,8 @@ class Rendition {
 					}
 
 					this.location = located;
+
+					localStorage.setItem(this.book.key()+"lastreadingpage", JSON.stringify(located));
 
 					/**
 					 * @event locationChanged
